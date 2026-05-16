@@ -1,0 +1,21 @@
+# Root ignores
+
+# Node
+**/node_modules/
+**/dist/
+
+# Java / Maven
+**/target/
+**/*.log
+
+# IDE
+**/.idea/
+**/.vscode/
+
+# OS
+Thumbs.db
+Desktop.ini
+
+# Env files
+.env
+.env.*
