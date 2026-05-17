@@ -101,7 +101,7 @@ function App() {
             !isAuthenticated ? (
               <Navigate to="/login" replace />
             ) : (
-              <ChangePasswordPage />
+              <ChangePasswordPage me={me} />
             )
           }
         />
@@ -115,7 +115,7 @@ function App() {
             ) : !(me.roles ?? []).some((r) => r.code === 'ADMIN') ? (
               <Navigate to="/" replace />
             ) : (
-              <UsersPage />
+              <UsersPage me={me} />
             )
           }
         />
@@ -129,7 +129,7 @@ function App() {
             ) : !(me.roles ?? []).some((r) => r.code === 'ADMIN') ? (
               <Navigate to="/" replace />
             ) : (
-              <RolesPage />
+              <RolesPage me={me} />
             )
           }
         />

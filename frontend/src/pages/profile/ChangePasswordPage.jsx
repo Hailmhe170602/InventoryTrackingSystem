@@ -1,38 +1,46 @@
-import React, { useState } from 'react'
-import { Button, Card, Form, Input, Space, Typography, message } from 'antd'
-import { changePasswordApi } from '../../api/auth'
+import React, { useState } from 'react';
+import { Button, Form, Input, message } from 'antd';
+import { KeyOutlined } from '@ant-design/icons';
+import { changePasswordApi } from '../../api/auth';
+import DashboardLayout from '../../components/DashboardLayout';
+import '../SubPages.css';
 
-export default function ChangePasswordPage() {
-  const [saving, setSaving] = useState(false)
-  const [form] = Form.useForm()
+export default function ChangePasswordPage({ me }) {
+  const [saving, setSaving] = useState(false);
+  const [form] = Form.useForm();
 
   const onFinish = async (values) => {
-    setSaving(true)
+    setSaving(true);
     try {
       await changePasswordApi({
         currentPassword: values.currentPassword,
         newPassword: values.newPassword,
-      })
-      message.success('Đổi mật khẩu thành công')
-      form.resetFields()
+      });
+      message.success('Đổi mật khẩu thành công');
+      form.resetFields();
     } catch (e) {
-      message.error(e?.response?.data?.message ?? 'Đổi mật khẩu thất bại')
+      message.error(e?.response?.data?.message ?? 'Đổi mật khẩu thất bại');
     } finally {
-      setSaving(false)
+      setSaving(false);
     }
-  }
+  };
 
   return (
-    <div style={{ padding: 24, maxWidth: 720, margin: '0 auto' }}>
-      <Space direction="vertical" style={{ width: '100%' }} size={16}>
-        <div>
-          <Typography.Title level={3} style={{ margin: 0 }}>
-            Đổi mật khẩu
-          </Typography.Title>
-          <Typography.Text type="secondary">Cập nhật mật khẩu đăng nhập của bạn.</Typography.Text>
+    <DashboardLayout me={me}>
+      <div className="subpage-container" style={{ maxWidth: 720 }}>
+        <div className="subpage-header">
+          <div className="subpage-header__title">
+            <h2>Đổi mật khẩu</h2>
+            <p>Cập nhật mật khẩu đăng nhập bảo mật cho tài khoản của bạn.</p>
+          </div>
         </div>
 
-        <Card>
+        <div className="premium-card">
+          <div className="premium-card__title">
+            <KeyOutlined style={{ color: 'var(--primary-color)', marginRight: 8 }} />
+            Đổi mật khẩu đăng nhập
+          </div>
+
           <Form form={form} layout="vertical" onFinish={onFinish} requiredMark={false}>
             <Form.Item
               label="Mật khẩu hiện tại"
@@ -61,8 +69,8 @@ export default function ChangePasswordPage() {
                 { required: true, message: 'Vui lòng xác nhận mật khẩu mới' },
                 ({ getFieldValue }) => ({
                   validator(_, value) {
-                    if (!value || getFieldValue('newPassword') === value) return Promise.resolve()
-                    return Promise.reject(new Error('Mật khẩu xác nhận không khớp'))
+                    if (!value || getFieldValue('newPassword') === value) return Promise.resolve();
+                    return Promise.reject(new Error('Mật khẩu xác nhận không khớp'));
                   },
                 }),
               ]}
@@ -70,12 +78,20 @@ export default function ChangePasswordPage() {
               <Input.Password placeholder="Nhập lại mật khẩu mới" />
             </Form.Item>
 
-            <Button type="primary" htmlType="submit" loading={saving}>
-              Đổi mật khẩu
-            </Button>
+            <div style={{ marginTop: 24 }}>
+              <Button 
+                type="primary" 
+                htmlType="submit" 
+                loading={saving}
+                className="premium-btn-primary"
+                style={{ width: '100%' }}
+              >
+                Đổi mật khẩu
+              </Button>
+            </div>
           </Form>
-        </Card>
-      </Space>
-    </div>
-  )
+        </div>
+      </div>
+    </DashboardLayout>
+  );
 }

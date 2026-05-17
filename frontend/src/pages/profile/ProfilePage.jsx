@@ -1,37 +1,96 @@
-import React from 'react'
-import { Card, Descriptions, Space, Tag, Typography } from 'antd'
+import React from 'react';
+import { Space } from 'antd';
+import { MailOutlined, SafetyCertificateOutlined, UserOutlined } from '@ant-design/icons';
+import DashboardLayout from '../../components/DashboardLayout';
+import '../SubPages.css';
 
 export default function ProfilePage({ me }) {
+  const rolesText = (me?.roles ?? []).map((r) => r.code).join(', ') || 'NO_ROLE';
+  const initialLetter = (me?.username || 'Admin').charAt(0).toUpperCase();
+
   return (
-    <div style={{ padding: 24, maxWidth: 900, margin: '0 auto' }}>
-      <Space direction="vertical" style={{ width: '100%' }} size={16}>
-        <div>
-          <Typography.Title level={3} style={{ margin: 0 }}>
-            Hồ sơ
-          </Typography.Title>
-          <Typography.Text type="secondary">Thông tin tài khoản.</Typography.Text>
+    <DashboardLayout me={me}>
+      <div className="subpage-container">
+        <div className="subpage-header">
+          <div className="subpage-header__title">
+            <h2>Hồ sơ cá nhân</h2>
+            <p>Quản lý và cập nhật thông tin tài khoản của bạn.</p>
+          </div>
         </div>
 
-        <Card title="Thông tin tài khoản">
-          <Descriptions column={1} size="middle">
-            <Descriptions.Item label="Username">{me?.username ?? '-'}</Descriptions.Item>
-            <Descriptions.Item label="Trạng thái">
-              {me?.enabled ? <Tag color="green">ENABLED</Tag> : <Tag>DISABLED</Tag>}
-            </Descriptions.Item>
-            <Descriptions.Item label="Roles">
-              {(me?.roles ?? []).length ? (
-                (me.roles ?? []).map((r) => (
-                  <Tag key={r.code} style={{ marginBottom: 6 }}>
-                    {r.code}
-                  </Tag>
-                ))
-              ) : (
-                <Tag>NO_ROLE</Tag>
-              )}
-            </Descriptions.Item>
-          </Descriptions>
-        </Card>
-      </Space>
-    </div>
-  )
+        <div className="premium-card" style={{ padding: 0, overflow: 'hidden' }}>
+          <div className="profile-banner" />
+          
+          <div className="profile-header-wrapper">
+            <div className="profile-avatar-glow">
+              <div className="profile-avatar-inner">
+                {initialLetter}
+              </div>
+            </div>
+            <div className="profile-meta-text">
+              <h3>{me?.username || 'Admin User'}</h3>
+              <p>
+                <SafetyCertificateOutlined style={{ color: 'var(--primary-color)' }} />
+                <span className="premium-tag premium-tag--primary">{rolesText}</span>
+              </p>
+            </div>
+          </div>
+
+          <div style={{ padding: '0 32px 32px 32px' }}>
+            <div className="premium-card__title">
+              Thông tin chi tiết tài khoản
+            </div>
+
+            <div className="info-grid">
+              <div className="info-item">
+                <div className="info-item__label">
+                  <UserOutlined style={{ marginRight: 6 }} /> Tên đăng nhập
+                </div>
+                <div className="info-item__value">
+                  {me?.username ?? '-'}
+                </div>
+              </div>
+
+              <div className="info-item">
+                <div className="info-item__label">
+                  <MailOutlined style={{ marginRight: 6 }} /> Địa chỉ Email
+                </div>
+                <div className="info-item__value">
+                  {me?.email ?? 'Chưa cập nhật email'}
+                </div>
+              </div>
+
+              <div className="info-item">
+                <div className="info-item__label">Trạng thái hệ thống</div>
+                <div className="info-item__value">
+                  {me?.enabled ? (
+                    <span className="premium-tag premium-tag--success" style={{ margin: 0 }}>ĐANG HOẠT ĐỘNG</span>
+                  ) : (
+                    <span className="premium-tag premium-tag--neutral" style={{ margin: 0 }}>VÔ HIỆU HÓA</span>
+                  )}
+                </div>
+              </div>
+
+              <div className="info-item">
+                <div className="info-item__label">Vai trò truy cập</div>
+                <div className="info-item__value">
+                  <Space size={6} wrap>
+                    {(me?.roles ?? []).length ? (
+                      (me.roles ?? []).map((r) => (
+                        <span className="premium-tag premium-tag--primary" key={r.code}>
+                          {r.code}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="premium-tag premium-tag--neutral">NO_ROLE</span>
+                    )}
+                  </Space>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </DashboardLayout>
+  );
 }

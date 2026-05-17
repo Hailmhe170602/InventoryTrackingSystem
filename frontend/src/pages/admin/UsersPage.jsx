@@ -1,59 +1,79 @@
-import React, { useEffect, useMemo, useState } from 'react'
-import { Button, Drawer, Form, Input, Select, Space, Switch, Table, Tag, Typography, message } from 'antd'
-import { PlusOutlined, ReloadOutlined } from '@ant-design/icons'
-import { createUserApi, listUsersApi, setUserEnabledApi, setUserRolesApi, updateUserApi } from '../../api/users'
-import { listRolesApi } from '../../api/rbac'
+import React, { useEffect, useMemo, useState } from 'react';
+import { Button, Drawer, Form, Input, Select, Space, Switch, Table, message } from 'antd';
+import { PlusOutlined, ReloadOutlined, UsergroupAddOutlined, EditOutlined, EyeOutlined } from '@ant-design/icons';
+import { createUserApi, listUsersApi, setUserEnabledApi, setUserRolesApi, updateUserApi } from '../../api/users';
+import { listRolesApi } from '../../api/rbac';
+import DashboardLayout from '../../components/DashboardLayout';
+import '../SubPages.css';
 
-export default function UsersPage() {
-  const [loading, setLoading] = useState(false)
-  const [rows, setRows] = useState([])
-  const [roles, setRoles] = useState([])
-  const [drawerOpen, setDrawerOpen] = useState(false)
-  const [editingUser, setEditingUser] = useState(null)
-  const [saving, setSaving] = useState(false)
-  const [form] = Form.useForm()
+export default function UsersPage({ me }) {
+  const [loading, setLoading] = useState(false);
+  const [rows, setRows] = useState([]);
+  const [roles, setRoles] = useState([]);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState(null);
+  const [isReadOnly, setIsReadOnly] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [form] = Form.useForm();
 
-  const roleOptions = useMemo(() => roles.map((r) => ({ value: r.code, label: r.code })), [roles])
+  const roleOptions = useMemo(() => roles.map((r) => ({ value: r.code, label: r.code })), [roles]);
 
   const load = async () => {
-    setLoading(true)
+    setLoading(true);
     try {
-      const [u, r] = await Promise.all([listUsersApi(), listRolesApi()])
-      setRows(u)
-      setRoles(r)
+      const [u, r] = await Promise.all([listUsersApi(), listRolesApi()]);
+      setRows(u);
+      setRoles(r);
     } catch (e) {
-      message.error(e?.response?.data?.message ?? 'Không tải được danh sách người dùng')
+      message.error(e?.response?.data?.message ?? 'Không tải được danh sách người dùng');
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
-    load()
-  }, [])
+    load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const openCreate = () => {
-    setEditingUser(null)
-    form.resetFields()
-    form.setFieldsValue({ roleCodes: ['VIEWER'], enabled: true })
-    setDrawerOpen(true)
-  }
+    setEditingUser(null);
+    setIsReadOnly(false);
+    form.resetFields();
+    form.setFieldsValue({ roleCodes: ['VIEWER'], enabled: true });
+    setDrawerOpen(true);
+  };
 
   const openEdit = (u) => {
-    setEditingUser(u)
-    form.resetFields()
+    setEditingUser(u);
+    setIsReadOnly(false);
+    form.resetFields();
     form.setFieldsValue({
       username: u.username,
       fullName: u.fullName,
       email: u.email,
       roleCodes: (u.roles ?? []).map((r) => r.code),
       enabled: !!u.enabled,
-    })
-    setDrawerOpen(true)
-  }
+    });
+    setDrawerOpen(true);
+  };
+
+  const openView = (u) => {
+    setEditingUser(u);
+    setIsReadOnly(true);
+    form.resetFields();
+    form.setFieldsValue({
+      username: u.username,
+      fullName: u.fullName,
+      email: u.email,
+      roleCodes: (u.roles ?? []).map((r) => r.code),
+      enabled: !!u.enabled,
+    });
+    setDrawerOpen(true);
+  };
 
   const onSaveUser = async (values) => {
-    setSaving(true)
+    setSaving(true);
     try {
       if (!editingUser) {
         await createUserApi({
@@ -62,59 +82,64 @@ export default function UsersPage() {
           email: values.email,
           password: values.password,
           roleCodes: values.roleCodes,
-        })
-        message.success('Đã tạo user')
+        });
+        message.success('Đã tạo user');
       } else {
-        await updateUserApi(editingUser.id, { fullName: values.fullName, email: values.email })
-        await setUserRolesApi(editingUser.id, values.roleCodes)
-        await setUserEnabledApi(editingUser.id, values.enabled)
-        message.success('Đã cập nhật user')
+        await updateUserApi(editingUser.id, { fullName: values.fullName, email: values.email });
+        await setUserRolesApi(editingUser.id, values.roleCodes);
+        await setUserEnabledApi(editingUser.id, values.enabled);
+        message.success('Đã cập nhật user');
       }
-      setDrawerOpen(false)
-      await load()
+      setDrawerOpen(false);
+      await load();
     } catch (e) {
-      message.error(e?.response?.data?.message ?? 'Lưu thất bại')
+      message.error(e?.response?.data?.message ?? 'Lưu thất bại');
     } finally {
-      setSaving(false)
+      setSaving(false);
     }
-  }
+  };
 
   const onToggleEnabled = async (userId, enabled) => {
     try {
-      await setUserEnabledApi(userId, enabled)
-      setRows((prev) => prev.map((u) => (u.id === userId ? { ...u, enabled } : u)))
-      message.success(enabled ? 'Đã kích hoạt tài khoản' : 'Đã vô hiệu hóa tài khoản')
+      await setUserEnabledApi(userId, enabled);
+      setRows((prev) => prev.map((u) => (u.id === userId ? { ...u, enabled } : u)));
+      message.success(enabled ? 'Đã kích hoạt tài khoản' : 'Đã vô hiệu hóa tài khoản');
     } catch (e) {
-      message.error(e?.response?.data?.message ?? 'Cập nhật trạng thái thất bại')
+      message.error(e?.response?.data?.message ?? 'Cập nhật trạng thái thất bại');
     }
-  }
+  };
 
   const onChangeRoles = async (userId, roleCodes) => {
     try {
-      await setUserRolesApi(userId, roleCodes)
+      await setUserRolesApi(userId, roleCodes);
       setRows((prev) =>
         prev.map((u) =>
           u.id === userId ? { ...u, roles: roleCodes.map((c) => ({ code: c, name: c })) } : u
         )
-      )
-      message.success('Đã cập nhật vai trò')
+      );
+      message.success('Đã cập nhật vai trò');
     } catch (e) {
-      message.error(e?.response?.data?.message ?? 'Cập nhật vai trò thất bại')
+      message.error(e?.response?.data?.message ?? 'Cập nhật vai trò thất bại');
     }
-  }
+  };
 
   const columns = [
     {
       title: 'ID',
       dataIndex: 'id',
-      width: 90,
+      width: 80,
+      render: (id) => <strong style={{ color: 'var(--text-secondary)' }}>#{id}</strong>,
     },
     {
-      title: 'Username',
+      title: 'Tài khoản',
       dataIndex: 'username',
+      render: (text) => (
+        <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{text}</span>
+      ),
     },
     {
-      title: 'Full name',
+      title: 'Họ và tên',
+      width: 260,
       dataIndex: 'fullName',
     },
     {
@@ -122,9 +147,9 @@ export default function UsersPage() {
       dataIndex: 'email',
     },
     {
-      title: 'Roles',
+      title: 'Vai trò (Roles)',
       dataIndex: 'roles',
-      width: 260,
+      width: 220,
       render: (roles, record) => (
         <Select
           mode="multiple"
@@ -132,116 +157,197 @@ export default function UsersPage() {
           style={{ width: '100%' }}
           options={roleOptions}
           onChange={(v) => onChangeRoles(record.id, v)}
+          className="premium-select-multiple"
+          disabled={record.username === 'admin'}
         />
       ),
     },
     {
       title: 'Trạng thái',
       dataIndex: 'enabled',
-      width: 160,
-      render: (enabled) => (enabled ? <Tag color="green">ENABLED</Tag> : <Tag>DISABLED</Tag>),
+      width: 140,
+      render: (enabled) => (
+        enabled ? (
+          <span className="premium-tag premium-tag--success">ENABLED</span>
+        ) : (
+          <span className="premium-tag premium-tag--neutral">DISABLED</span>
+        )
+      ),
     },
     {
-      title: 'Duyệt',
+      title: 'Kích hoạt',
       dataIndex: 'enabled',
-      width: 120,
+      width: 100,
       render: (enabled, record) => (
-        <Switch checked={enabled} onChange={(v) => onToggleEnabled(record.id, v)} />
+        <Switch 
+          checked={enabled} 
+          onChange={(v) => onToggleEnabled(record.id, v)} 
+          disabled={record.username === 'admin'}
+        />
       ),
     },
     {
       title: 'Hành động',
       key: 'actions',
-      width: 120,
+      width: 180,
       render: (_, record) => (
-        <Button size="small" onClick={() => openEdit(record)}>
-          Xem/Sửa
-        </Button>
-      ),
-    },
-  ]
-
-  return (
-    <div style={{ padding: 24, maxWidth: 1100, margin: '0 auto' }}>
-      <Space style={{ width: '100%', justifyContent: 'space-between', marginBottom: 16 }}>
-        <div>
-          <Typography.Title level={3} style={{ margin: 0 }}>
-            Quản lý tài khoản
-          </Typography.Title>
-          <Typography.Text type="secondary">
-            Tài khoản người dùng đăng ký sẽ ở trạng thái DISABLED cho đến khi được admin duyệt.
-          </Typography.Text>
-        </div>
-        <Space>
-          <Button icon={<ReloadOutlined />} onClick={load} loading={loading}>
-            Tải lại
+        <Space size={8}>
+          <Button 
+            size="small" 
+            icon={<EyeOutlined />}
+            onClick={() => openView(record)}
+            className="premium-btn-outline premium-btn-table"
+          >
+            Xem
           </Button>
-          <Button type="primary" icon={<PlusOutlined />} onClick={openCreate}>
-            Thêm user
+          <Button 
+            size="small" 
+            icon={<EditOutlined />}
+            onClick={() => openEdit(record)}
+            className="premium-btn-outline premium-btn-table"
+            disabled={record.username === 'admin'}
+          >
+            Sửa
           </Button>
         </Space>
-      </Space>
+      ),
+    },
+  ];
 
-      <Table
-        rowKey="id"
-        loading={loading}
-        columns={columns}
-        dataSource={rows}
-        pagination={{ pageSize: 10 }}
-      />
-
-      <Drawer
-        title={editingUser ? `User #${editingUser.id}` : 'Tạo user'}
-        open={drawerOpen}
-        onClose={() => setDrawerOpen(false)}
-        width={520}
-        destroyOnClose
-      >
-        <Form layout="vertical" form={form} onFinish={onSaveUser} requiredMark={false}>
-          <Form.Item label="Username" name="username" rules={[{ required: true, message: 'Vui lòng nhập username' }]}>
-            <Input disabled={!!editingUser} />
-          </Form.Item>
-          <Form.Item label="Full name" name="fullName" rules={[{ required: true, message: 'Vui lòng nhập họ tên' }]}>
-            <Input />
-          </Form.Item>
-          <Form.Item
-            label="Email"
-            name="email"
-            rules={[{ required: true, message: 'Vui lòng nhập email' }, { type: 'email', message: 'Email không hợp lệ' }]}
-          >
-            <Input />
-          </Form.Item>
-
-          {!editingUser && (
-            <Form.Item
-              label="Password"
-              name="password"
-              rules={[{ required: true, message: 'Vui lòng nhập mật khẩu' }, { min: 6, message: 'Tối thiểu 6 ký tự' }]}
+  return (
+    <DashboardLayout me={me}>
+      <div className="subpage-container">
+        <div className="subpage-header">
+          <div className="subpage-header__title">
+            <h2>Quản lý tài khoản</h2>
+            <p>Phê duyệt tài khoản đăng ký mới và cập nhật phân quyền truy cập hệ thống.</p>
+          </div>
+          <Space size={12}>
+            <Button 
+              icon={<ReloadOutlined />} 
+              onClick={load} 
+              loading={loading}
+              className="premium-btn-outline"
             >
-              <Input.Password />
-            </Form.Item>
-          )}
-
-          <Form.Item label="Roles" name="roleCodes">
-            <Select mode="multiple" options={roleOptions} />
-          </Form.Item>
-
-          {!!editingUser && (
-            <Form.Item label="Enabled" name="enabled" valuePropName="checked">
-              <Switch />
-            </Form.Item>
-          )}
-
-          <Space>
-            <Button type="primary" htmlType="submit" loading={saving}>
-              Lưu
+              Tải lại
             </Button>
-            <Button onClick={() => setDrawerOpen(false)} disabled={saving}>
-              Hủy
+            <Button 
+              type="primary" 
+              icon={<PlusOutlined />} 
+              onClick={openCreate}
+              className="premium-btn-primary"
+            >
+              Thêm thành viên
             </Button>
           </Space>
-        </Form>
-      </Drawer>
-    </div>
-  )
+        </div>
+
+        <div className="premium-card" style={{ padding: 20 }}>
+          <Table
+            rowKey="id"
+            loading={loading}
+            columns={columns}
+            dataSource={rows}
+            pagination={{ pageSize: 10 }}
+            className="premium-table"
+            scroll={{ x: 'max-content' }}
+          />
+        </div>
+
+        <Drawer
+          title={
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <UsergroupAddOutlined style={{ color: 'var(--primary-color)' }} />
+              <span>
+                {isReadOnly 
+                  ? `Chi tiết tài khoản #${editingUser?.id}` 
+                  : editingUser 
+                    ? `Thông tin tài khoản #${editingUser.id}` 
+                    : 'Thêm thành viên mới'}
+              </span>
+            </div>
+          }
+          open={drawerOpen}
+          onClose={() => setDrawerOpen(false)}
+          width={480}
+          destroyOnClose
+          className="premium-drawer"
+        >
+          <Form layout="vertical" form={form} onFinish={onSaveUser} requiredMark={false}>
+            <Form.Item 
+              label="Tên đăng nhập (Username)" 
+              name="username" 
+              rules={[{ required: true, message: 'Vui lòng nhập username' }]}
+            >
+              <Input disabled={true} placeholder="Username tài khoản..." />
+            </Form.Item>
+            
+            <Form.Item 
+              label="Họ và tên" 
+              name="fullName" 
+              rules={[{ required: true, message: 'Vui lòng nhập họ tên' }]}
+            >
+              <Input disabled={isReadOnly} placeholder="Nguyễn Văn A..." />
+            </Form.Item>
+            
+            <Form.Item
+              label="Địa chỉ Email"
+              name="email"
+              rules={[
+                { required: true, message: 'Vui lòng nhập email' }, 
+                { type: 'email', message: 'Email không hợp lệ' }
+              ]}
+            >
+              <Input disabled={isReadOnly} placeholder="email@example.com..." />
+            </Form.Item>
+
+            {!editingUser && (
+              <Form.Item
+                label="Mật khẩu đăng nhập"
+                name="password"
+                rules={[
+                  { required: true, message: 'Vui lòng nhập mật khẩu' }, 
+                  { min: 6, message: 'Tối thiểu 6 ký tự' }
+                ]}
+              >
+                <Input.Password disabled={isReadOnly} placeholder="Mật khẩu bảo mật..." />
+              </Form.Item>
+            )}
+
+            <Form.Item label="Vai trò (Roles)" name="roleCodes" style={{ marginBottom: 24 }}>
+              <Select 
+                mode="multiple" 
+                options={roleOptions} 
+                placeholder="Gán vai trò hệ thống..." 
+                disabled={isReadOnly}
+              />
+            </Form.Item>
+
+            {!!editingUser && (
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', alignItems: 'center', background: 'var(--neutral-light)', padding: '16px 20px', borderRadius: 12, marginBottom: 32 }}>
+                <div>
+                  <strong style={{ display: 'block', color: 'var(--text-primary)' }}>Trạng thái tài khoản</strong>
+                  <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Kích hoạt hoặc chặn quyền truy cập của người dùng này</span>
+                </div>
+                <Form.Item name="enabled" valuePropName="checked" style={{ margin: 0 }}>
+                  <Switch disabled={isReadOnly} />
+                </Form.Item>
+              </div>
+            )}
+
+            <Space size={12} style={{ width: '100%', justifyContent: 'flex-end', marginTop: 24 }}>
+              <Button onClick={() => setDrawerOpen(false)} disabled={saving} className="premium-btn-outline" style={{ height: '40px !important' }}>
+                {isReadOnly ? 'Đóng' : 'Hủy bỏ'}
+              </Button>
+              {!isReadOnly && (
+                <Button type="primary" htmlType="submit" loading={saving} className="premium-btn-primary" style={{ height: '40px !important' }}>
+                  Lưu tài khoản
+                </Button>
+              )}
+            </Space>
+          </Form>
+        </Drawer>
+      </div>
+    </DashboardLayout>
+  );
 }
