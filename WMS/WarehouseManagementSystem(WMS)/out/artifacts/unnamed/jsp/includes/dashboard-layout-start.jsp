@@ -171,6 +171,8 @@
         <c:set var="canViewBrands" value="${isAdmin || currentUser.hasPermission('BRAND_READ') || currentUser.hasPermission('BRAND_WRITE')}"/>
         <c:set var="canViewSuppliers" value="${isAdmin || currentUser.hasPermission('SUPPLIER_READ') || currentUser.hasPermission('SUPPLIER_WRITE')}"/>
         <c:set var="canViewProductLines" value="${isAdmin || currentUser.hasPermission('PRODUCT_LINE_READ') || currentUser.hasPermission('PRODUCT_LINE_WRITE')}"/>
+        <c:set var="canViewProducts" value="${isAdmin || currentUser.hasPermission('PRODUCT_READ') || currentUser.hasPermission('PRODUCT_WRITE')}"/>
+        <c:set var="canViewInventories" value="${isAdmin || currentUser.hasPermission('INVENTORY_READ') || currentUser.hasPermission('INVENTORY_WRITE')}"/>
         
         <c:if test="${canManageUsers}">
           <a class="${activePage == 'users' ? 'active' : ''}" href="${pageContext.request.contextPath}/admin/users">
@@ -221,6 +223,27 @@
               <rect x="9" y="9" width="6" height="6"></rect>
             </svg>
             <span>Dòng sản phẩm</span>
+          </a>
+        </c:if>
+
+        <c:if test="${canViewProducts}">
+          <a class="${activePage == 'products' ? 'active' : ''}" href="${pageContext.request.contextPath}/admin/products">
+            <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+              <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+              <line x1="12" y1="22.08" x2="12" y2="12"></line>
+            </svg>
+            <span>Quản lý Sản phẩm</span>
+          </a>
+        </c:if>
+
+        <c:if test="${canViewInventories}">
+          <a class="${activePage == 'inventories' ? 'active' : ''}" href="${pageContext.request.contextPath}/admin/inventories">
+            <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path>
+              <path d="M22 12A10 10 0 0 0 12 2v10z"></path>
+            </svg>
+            <span>Quản lý Tồn kho</span>
           </a>
         </c:if>
       </nav>
