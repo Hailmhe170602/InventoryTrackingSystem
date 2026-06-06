@@ -67,7 +67,7 @@
                 <strong style="color: var(--text-primary); font-size: 14px;">${i.product.name}</strong><br/>
                 <small style="color: var(--text-secondary);">${i.product.productLine.brand.name} - ${i.product.productLine.name}</small>
               </td>
-              <td style="text-align: right; font-weight: 700; font-size: 16px; ${i.quantityInStock <= i.minStockLevel ? 'color: #ef4444;' : 'color: #10b981;'}">
+              <td class="${i.quantityInStock <= i.minStockLevel ? 'stock-low' : 'stock-ok'}" style="text-align: right; font-weight: 700; font-size: 16px;">
                 <fmt:formatNumber value="${i.quantityInStock}"/> ${i.product.unit}
               </td>
               <td style="text-align: right; color: var(--text-secondary);">
@@ -104,7 +104,6 @@
         </tbody>
       </table>
     </div>
-
     <!-- Pagination Toolbar -->
     <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 24px; padding-top: 16px; border-top: 1.5px solid var(--card-border); flex-wrap: wrap; gap: 16px;">
       <div style="font-size: 14px; color: var(--text-secondary); font-weight: 600;">
@@ -205,6 +204,9 @@
     cursor: not-allowed;
     background: #f8fafc;
   }
+
+  .stock-low { color: #ef4444 !important; }
+  .stock-ok { color: #10b981 !important; }
 </style>
 
 <script>
