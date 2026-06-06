@@ -45,7 +45,6 @@
                style="width: 100%; padding: 10px 16px 10px 40px; border: 1.5px solid var(--card-border); border-radius: 10px; font-size: 14px; outline: none; transition: all 0.2s; background: #ffffff;"
                onfocus="this.style.borderColor='var(--primary-color)';" 
                onblur="this.style.borderColor='var(--card-border)';"/>
-        <button type="submit" class="premium-btn-primary" style="height: 42px !important; padding: 0 20px !important; font-size: 13.5px !important; border-radius: 10px !important;">Tìm kiếm</button>
       </form>
     </div>
     
