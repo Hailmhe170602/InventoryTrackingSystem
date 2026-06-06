@@ -124,22 +124,22 @@ public class RoleAdminServlet extends HttpServlet {
         String action = WebUtil.param(request, "action");
 
         try {
-            if ("delete".equalsIgnoreCase(action)) {
+            if ("toggle-status".equalsIgnoreCase(action)) {
                 long id = Long.parseLong(WebUtil.param(request, "id"));
+                boolean enabled = "true".equalsIgnoreCase(WebUtil.param(request, "enabled"));
                 Role role = roleDAO.findByIdWithPermissions(id);
-                if (role != null && "ADMIN".equalsIgnoreCase(role.getCode())) {
-                    WebUtil.setFlashError(request, "Không thể xóa vai trò ADMIN mặc định");
-                    WebUtil.redirect(request, response, "/admin/roles?id=" + id);
-                    return;
-                }
-                int userCount = roleDAO.countUsersWithRole(id);
-                if (userCount > 0) {
-                    WebUtil.setFlashError(request, "Không thể xóa vai trò \"" + (role != null ? role.getCode() : "") + "\" vì đang có " + userCount + " tài khoản đang sử dụng vai trò này.");
+                if (role == null) {
+                    WebUtil.setFlashError(request, "Vai trò không tồn tại");
                     WebUtil.redirect(request, response, "/admin/roles");
                     return;
                 }
-                roleDAO.deleteRole(id);
-                WebUtil.setFlashSuccess(request, "Đã xóa vai trò thành công");
+                if ("ADMIN".equalsIgnoreCase(role.getCode()) && !enabled) {
+                    WebUtil.setFlashError(request, "Không thể khóa vai trò ADMIN mặc định");
+                    WebUtil.redirect(request, response, "/admin/roles");
+                    return;
+                }
+                roleDAO.setEnabled(id, enabled);
+                WebUtil.setFlashSuccess(request, "Đã " + (enabled ? "kích hoạt" : "hủy kích hoạt") + " vai trò thành công");
                 WebUtil.redirect(request, response, "/admin/roles");
                 return;
             }

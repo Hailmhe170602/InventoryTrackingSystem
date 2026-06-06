@@ -157,20 +157,34 @@
                         Chỉnh sửa
                       </a>
                       <c:if test="${r.code != 'ADMIN'}">
-                        <form id="delete-role-form-${r.id}" method="post" action="${pageContext.request.contextPath}/admin/roles" style="margin: 0;">
-                          <input type="hidden" name="action" value="delete"/>
+                        <form id="toggle-role-form-${r.id}" method="post" action="${pageContext.request.contextPath}/admin/roles" style="margin: 0;">
+                          <input type="hidden" name="action" value="toggle-status"/>
                           <input type="hidden" name="id" value="${r.id}"/>
-                          <button type="button" class="action-dropdown-item action-dropdown-item--danger" 
-                                  onclick="if(confirm('Bạn có chắc chắn muốn xóa vai trò này? Tất cả các liên kết tài khoản sẽ bị gỡ bỏ.')) { document.getElementById('delete-role-form-${r.id}').submit(); }"
-                                  style="display: flex; align-items: center; width: 100%; gap: 8px; padding: 12px 16px; font-size: 13px; font-weight: 600; background: none; border: none; text-align: left; cursor: pointer; transition: background 0.15s;">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                              <polyline points="3 6 5 6 21 6"></polyline>
-                              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                              <line x1="10" y1="11" x2="10" y2="17"></line>
-                              <line x1="14" y1="11" x2="14" y2="17"></line>
-                            </svg>
-                            Xóa vai trò
-                          </button>
+                          <input type="hidden" name="enabled" value="${not r.enabled}"/>
+                          <c:choose>
+                            <c:when test="${r.enabled}">
+                              <button type="button" class="action-dropdown-item action-dropdown-item--danger" 
+                                      onclick="if(confirm('Bạn có chắc chắn muốn không kích hoạt vai trò này?')) { document.getElementById('toggle-role-form-${r.id}').submit(); }"
+                                      style="display: flex; align-items: center; width: 100%; gap: 8px; padding: 12px 16px; font-size: 13px; font-weight: 600; background: none; border: none; text-align: left; cursor: pointer; transition: background 0.15s;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                  <circle cx="12" cy="12" r="10"></circle>
+                                  <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line>
+                                </svg>
+                                Không kích hoạt
+                              </button>
+                            </c:when>
+                            <c:otherwise>
+                              <button type="button" class="action-dropdown-item action-dropdown-item--success" 
+                                      onclick="if(confirm('Bạn có chắc chắn muốn kích hoạt vai trò này?')) { document.getElementById('toggle-role-form-${r.id}').submit(); }"
+                                      style="display: flex; align-items: center; width: 100%; gap: 8px; padding: 12px 16px; font-size: 13px; font-weight: 600; background: none; border: none; text-align: left; cursor: pointer; transition: background 0.15s;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                  <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                                </svg>
+                                Kích hoạt
+                              </button>
+                            </c:otherwise>
+                          </c:choose>
                         </form>
                       </c:if>
                     </c:if>
@@ -273,6 +287,9 @@
   }
   .action-dropdown-item--danger {
     color: #ef4444 !important;
+  }
+  .action-dropdown-item--success {
+    color: #10b981 !important;
   }
   .premium-tag--danger {
     background: rgba(239, 68, 68, 0.1) !important;

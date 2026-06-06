@@ -108,13 +108,15 @@
                 <c:if test="${r.code == 'MANAGER'}"><c:set var="roleClass" value="premium-tag--manager"/></c:if>
                 <c:if test="${r.code == 'STAFF' || r.code == 'WAREHOUSE' || r.code == 'WAREHOUSE STAFF'}"><c:set var="roleClass" value="premium-tag--staff"/></c:if>
                 
-                <div style="display: flex; align-items: flex-start; gap: 16px; padding: 16px; border: 1.5px solid var(--card-border); border-radius: 12px; background: #f8fafc;">
-                  <span class="premium-tag ${roleClass}" style="font-size: 12px; font-weight: 700; padding: 6px 12px; border-radius: 8px; margin-top: 2px;">
+                <div style="display: flex; align-items: center; gap: 16px; padding: 16px; border: 1.5px solid var(--card-border); border-radius: 12px; background: #f8fafc;">
+                  <span class="premium-tag ${roleClass}" style="font-size: 14px; font-weight: 700; padding: 4px 12px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; height: fit-content; line-height: 1.2;">
                     ${r.code}
                   </span>
-                  <div>
-                    <h4 style="margin: 0 0 4px 0; font-size: 15px; font-weight: 700; color: var(--text-primary);"><c:out value="${r.name}"/></h4>
-                    <p style="margin: 0; font-size: 13px; color: var(--text-secondary);"><c:out value="${r.description}"/></p>
+                  <div style="display: flex; flex-direction: column; justify-content: center;">
+                    <h4 style="margin: 0; font-size: 15px; font-weight: 700; color: var(--text-primary); line-height: 1.2;"><c:out value="${r.name}"/></h4>
+                    <c:if test="${not empty r.description}">
+                      <p style="margin: 4px 0 0 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;"><c:out value="${r.description}"/></p>
+                    </c:if>
                   </div>
                 </div>
               </c:forEach>
